@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>CropSuiteLite Map Viewer (Colorized PNG, No -1 Values)</title>
+
+  <!-- Leaflet CSS -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      font-family: "Segoe UI", Roboto, sans-serif;
+      display: flex;
+    }
+
+    #map {
+      height: 100vh;
+      width: 80%;
+    }
+
+    .sidebar {
+      width: 20%;
+      height: 100vh;
+      background: rgba(255, 255, 255, 0.96);
+      box-shadow: -2px 0 6px rgba(0, 0, 0, 0.2);
+      padding: 16px;
+      overflow-y: auto;
+    }
+
+    .sidebar h3 {
+      text-align: center;
+      margin-top: 0;
+      color: #2c3e50;
+      border-bottom: 1px solid #ccc;
+      padding-bottom: 8px;
+    }
+
+    fieldset {
+      border: 1px solid #ddd;
+      border-radius: 8px;
+      padding: 10px;
+      margin-top: 14px;
+    }
+
+    legend {
+      font-weight: bold;
+      color: #444;
+      padding: 0 6px;
+    }
+
+    label {
+      display: block;
+      margin-bottom: 5px;
+      font-size: 13px;
+    }
+
+    input[type="radio"] {
+      margin-right: 6px;
+    }
+
+    button {
+      width: 100%;
+      margin-top: 16px;
+      padding: 10px;
+      border: none;
+      border-radius: 8px;
+      background-color: #2d9750;
+      color: white;
+      font-weight: bold;
+      cursor: pointer;
+    }
+
+    button:hover {
+      background-color: #c62828;
+    }
+
+.region-tabs-top {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  z-index: 1000;
+  background: rgba(255, 255, 255, 0.9);
+  border-radius: 6px;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+  display: flex;
+  overflow: hidden;
+}
+
+.region-tab-top {
+  border: none;
+  padding: 6px 12px;
+  background: transparent;
+  cursor: pointer;
+  font-weight: bold;
+  font-size: 13px;
+  color: #333;
+  transition: all 0.2s ease;
+}
+
+.region-tab-top.active {
+  background: #2d9750;
+  color: white;
+}
+
+.region-tab-top:hover {
+  background: #43a047;
+  color: white;
+}
+
+  </style>
+</head>
+
+<body>
+  <div class="region-tabs-top">
+    <button class="region-tab-top active" data-region="honduras">Honduras</button>
+  </div>
+
+  <div id="map"></div>
+  
+  <div class="sidebar">
+    <h3>CropSuite</h3>
+
+    <fieldset id="cropSet">
+      <legend>Crop</legend>
+      <label><input type="radio" name="crop" value="banana"> Banana</label>
+      <label><input type="radio" name="crop" value="beans" checked> Beans</label>
+      <label><input type="radio" name="crop" value="cassava"> Cassava</label>
+      <label><input type="radio" name="crop" value="maize"> Maize</label>
+      <label><input type="radio" name="crop" value="coffeearabica"> Coffe Arabica</label>
+    </fieldset>
+
+    <fieldset id="sspSet">
+      <legend>SSP Scenario</legend>
+      <label><input type="radio" name="ssp" value="ssp126" checked> SSP126</label>
+      <label><input type="radio" name="ssp" value="ssp245"> SSP245</label>
+      <label><input type="radio" name="ssp" value="ssp370"> SSP370</label>
+    </fieldset>
+
+    <fieldset id="periodSet">
+      <legend>Period</legend>
+      <label><input type="radio" name="period" value="2021_2040" checked> 2021–2040</label>
+      <label><input type="radio" name="period" value="2041_2060"> 2041–2060</label>
+      <label><input type="radio" name="period" value="2061_2080"> 2061–2080</label>
+      
+    </fieldset>
+    
+  </div>
+
+  <div id="chart-container"
+       style="position:absolute; bottom:10px; right:20px;
+              width:480px; height:650px;
+              background:rgba(255,255,255,0.9);
+              border-radius:8px;
+              box-shadow:0 2px 8px rgba(0,0,0,0.25);
+              z-index:1000;">
+  </div>
+
+  <!-- Dependencies -->
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <script src="https://unpkg.com/georaster/dist/georaster.browser.min.js"></script>
+  <script src="https://unpkg.com/georaster-layer-for-leaflet/dist/georaster-layer-for-leaflet.min.js"></script>
+
+  <script src="https://cdn.jsdelivr.net/npm/echarts@5/dist/echarts.min.js"></script>
+  <script src="src/js/geotiff_vis.js"></script>
+  <script src="src/js/suitability_chart.js"></script> 
+  <!-- Dependencies -->
+   
+
+</body>
+</html>
