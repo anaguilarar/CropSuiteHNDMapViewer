@@ -74,23 +74,40 @@ function updateSuitabilityChart() {
 
   const option = {
     title: {
-      text: `${crop} | ${ssp}`,
+      text: `${crop.charAt(0).toUpperCase() + crop.slice(1)} | ${ssp}`,
       left: "center",
-      textStyle: { fontSize: 12 }
+      textStyle: { fontSize: 18 },
+      top: 5
     },
     tooltip: { trigger: "axis", axisPointer: { type: "shadow" } },
-    legend: { top: 20, textStyle: { fontSize: 10 } },
-    grid: { left: "25%", right: "5%", bottom: "5%", containLabel: true },
+    legend: { top: 30, textStyle: { fontSize: 10 } },
+    grid: { left: "5%", right: "20%", bottom: "10%", top: "15%", containLabel: true },
     xAxis: {
       type: "value",
-      name: "Mean Suitability"
+      name: "Suitability",
+      nameLocation: "middle",   // centers the name below the axis
+      nameGap: 30,              // adds vertical spacing from the axis line
+      nameTextStyle: {
+        fontWeight: "bold",
+        fontSize: 12
+      }
     },
     yAxis: {
       type: "category",
       data: deptos,
+      nameGap: 10,
+      nameTextStyle: {
+        fontWeight: "bold",
+        fontSize: 12
+      },
       name: "Department"
     },
-    series
+    series: series.map((s, i) => ({
+    ...s,
+    itemStyle: {
+      color: ['#791a96ff', '#150c9bff', '#fa3487ff', '#d7191c'][i % 4] // green–yellow–orange–red
+    }
+  }))
   };
 
   suitabilityChart.setOption(option, true);
