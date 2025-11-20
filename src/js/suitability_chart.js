@@ -115,7 +115,7 @@ function updateSuitabilityChart() {
 }
 
 // --- Listen to sidebar radio buttons for live updates ---
-["crop", "ssp", "period", "model"].forEach(name => {
+["crop", "ssp",  "model"].forEach(name => {
   document.querySelectorAll(`input[name="${name}"]`).forEach(el => {
     el.addEventListener("change", updateSuitabilityChart);
   });
