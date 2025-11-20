@@ -31,11 +31,12 @@ function updateSuitabilityChart() {
 
   const crop = document.querySelector('input[name="crop"]:checked')?.value;
   const ssp = document.querySelector('input[name="ssp"]:checked')?.value;
+  const model = document.querySelector('input[name="model"]:checked')?.value;
   const currentPeriod = document.querySelector('input[name="period"]:checked')?.value;
 
   // Filter only the selected crop + SSP
   const filtered = suitabilityData.filter(
-    d => d.crop === crop && d.ssp === ssp
+    d => d.crop === crop && d.ssp === ssp && d.model === model
   );
 
   if (filtered.length === 0) {
@@ -105,7 +106,7 @@ function updateSuitabilityChart() {
     series: series.map((s, i) => ({
     ...s,
     itemStyle: {
-      color: ['#791a96ff', '#150c9bff', '#fa3487ff', '#d7191c'][i % 4] // green–yellow–orange–red
+      color: ['#791a96ff', '#150c9bff', '#fa3487ff'][i % 3] // green–yellow–orange–red
     }
   }))
   };
@@ -114,7 +115,7 @@ function updateSuitabilityChart() {
 }
 
 // --- Listen to sidebar radio buttons for live updates ---
-["crop", "ssp"].forEach(name => {
+["crop", "ssp", "period", "model"].forEach(name => {
   document.querySelectorAll(`input[name="${name}"]`).forEach(el => {
     el.addEventListener("change", updateSuitabilityChart);
   });

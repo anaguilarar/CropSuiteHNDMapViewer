@@ -166,8 +166,10 @@ async function updateLayer() {
   const crop = getSelectedValue("crop");
   const ssp = getSelectedValue("ssp");
   const period = getSelectedValue("period");
+  const model = getSelectedValue("model");
   
-  const path = `src/cog/${ssp}_${period}_${crop}_s0_suitability.png`;
+  const path = `src/cog/${model}_${ssp}_${period}_${crop}_bl_suit.png`;
+  //const path = `src/cog/${model}_${ssp}_${period}_${crop}_s0_suitability.png`;
   var is_not_diff_layer = 0
 
   console.log('path: 000:', path);
@@ -180,7 +182,7 @@ async function updateLayer() {
 }
 
 // Event listeners
-["crop", "ssp", "period"].forEach(name => {
+["crop", "ssp", "period", "model"].forEach(name => {
   document.querySelectorAll(`input[name="${name}"]`).forEach(el => {
     el.addEventListener("change", updateLayer);
   });
