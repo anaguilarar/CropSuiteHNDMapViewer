@@ -41,7 +41,8 @@ function interpolateColor(val, is_diff) {
       const g = Math.round(low.color[1] + t * (high.color[1] - low.color[1]));
       const b = Math.round(low.color[2] + t * (high.color[2] - low.color[2]));
       const alpha = val < 20 ? 0.02 * val : 1;
-      return `rgba(${r},${g},${b},${alpha})`;
+      //return `rgba(${r},${g},${b},${alpha})`;
+      return `rgba(${r},${g},${b})`;
     }
   }
   return `rgba(${colorMap[colorMap.length - 1].color.join(",")},1)`;
