@@ -80,7 +80,23 @@ function updateSuitabilityChart() {
       textStyle: { fontSize: 18 },
       top: 5
     },
-    tooltip: { trigger: "axis", axisPointer: { type: "shadow" } },
+    tooltip: { trigger: "axis", 
+      axisPointer: { type: "shadow" },
+    formatter: function (params) {
+    let html = `${params[0].name}<br>`;
+    params.forEach(p => {
+      const val = (typeof p.value === "number")
+        ? p.value.toFixed(2)   // 🎯 FORMAT HERE
+        : p.value;
+
+      html += `
+        <span style="display:inline-block;width:10px;height:10px;background:${p.color};margin-right:5px;"></span>
+        ${p.seriesName}: <b>${val}</b><br>
+      `;
+    });
+    return html;
+  }
+ },
     legend: { top: 30, textStyle: { fontSize: 10 } },
     grid: { left: "5%", right: "20%", bottom: "10%", top: "15%", containLabel: true },
     xAxis: {

@@ -72,9 +72,6 @@
       cursor: pointer;
     }
 
-    button:hover {
-      background-color: #c62828;
-    }
 
 .region-tabs-top {
   position: absolute;
@@ -132,7 +129,8 @@
   <div style="display:flex; width:100%; height:100vh;">
   <div id="map" style="flex:1;"></div>
   <div id="chart-container"></div>
-</div>
+  </div>
+
 
   <div class="sidebar">
     <h3>CropSuite</h3>
@@ -166,6 +164,9 @@
       <label><input type="radio" name="period" value="2041_2050"> 2041–2050</label>
       <label><input type="radio" name="period" value="2051_2060"> 2051–2060</label>
     </fieldset>
+   <button id="toggleDeptBtn" >
+    Show Departments
+  </button>
     
   </div>
 

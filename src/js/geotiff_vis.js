@@ -3,6 +3,7 @@ let currentLayer = null;
 let legend = null; // ✅ define legend globally
 
 
+
 const SuitcolorMap = [
   { value: 0, color: [215, 212, 213] },
   { value: 20, color: [245, 144, 83] },
@@ -53,6 +54,31 @@ async function checkFileExists(url) {
   } catch {
     return false;
   }
+}
+
+async function loadDepartments() {
+  if (deptLayer) {
+    map.removeLayer(deptLayer);
+  }
+
+  const response = await fetch("src/data/country.geojson");
+  const geojson = await response.json();
+
+  deptLayer = L.geoJSON(geojson, {
+    style: {
+      color: "#222",
+      weight: 1,
+      fillOpacity: 0
+    },
+    onEachFeature: function (feature, layer) {
+      layer.bindTooltip(feature.properties.DEPTO || "Department", {
+        permanent: false,
+        direction: "auto"
+      });
+    }
+  });
+
+  deptLayer.addTo(map);
 }
 
 
@@ -179,7 +205,24 @@ async function updateLayer() {
       legend = null;
   }
   addLegend(true); // ✅ legend now works
+  
 }
+
+document.getElementById("toggleDeptBtn").addEventListener("click", async () => {
+  if (!deptLayer) {
+    await loadDepartments();
+  }
+
+  if (deptVisible) {
+    map.removeLayer(deptLayer);
+    deptVisible = false;
+  } else {
+    deptLayer.addTo(map);
+    deptVisible = true;
+  }
+});
+let deptLayer = null;
+let deptVisible = false;
 
 // Event listeners
 ["crop", "ssp", "period", "model"].forEach(name => {
