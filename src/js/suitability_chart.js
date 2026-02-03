@@ -80,7 +80,7 @@ function updateSuitabilityChart() {
       text: `${crop.charAt(0).toUpperCase() + crop.slice(1)} | ${ssp} \n Scenario A data`,
       left: "center",
       textStyle: { fontSize: 16 },
-      top: 5
+      top: 8
     },
     tooltip: { trigger: "axis", 
       axisPointer: { type: "shadow" },
@@ -99,7 +99,7 @@ function updateSuitabilityChart() {
     return html;
   }
  },
-    legend: { top: 30, textStyle: { fontSize: 10 } },
+    legend: { top: 45, textStyle: { fontSize: 10 } },
     grid: { left: "5%", right: "20%", bottom: "10%", top: "15%", containLabel: true },
     xAxis: {
       type: "value",
