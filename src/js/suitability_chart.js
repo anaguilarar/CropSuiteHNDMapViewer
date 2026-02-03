@@ -77,9 +77,9 @@ function updateSuitabilityChart() {
 
   const option = {
     title: {
-      text: `${crop.charAt(0).toUpperCase() + crop.slice(1)} | ${ssp}`,
+      text: `${crop.charAt(0).toUpperCase() + crop.slice(1)} | ${ssp} \n Scenario A data`,
       left: "center",
-      textStyle: { fontSize: 18 },
+      textStyle: { fontSize: 16 },
       top: 5
     },
     tooltip: { trigger: "axis", 
