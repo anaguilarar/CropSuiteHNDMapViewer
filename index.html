@@ -4,9 +4,8 @@
   <meta charset="utf-8">
   <title>CropSuiteLite Map Viewer (Colorized PNG, No -1 Values)</title>
 
-  <!-- Leaflet CSS -->
-  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
-
+  <!-- OpenLayers CSS -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/ol@v8.2.0/ol.css">
   <style>
     body {
       margin: 0;
@@ -14,174 +13,367 @@
       font-family: "Segoe UI", Roboto, sans-serif;
       display: flex;
     }
+    
 
-    #map {
-      height: 100vh;
-      width: 90%;
-    }
-
-    .sidebar {
-      width: 20%;
-      height: 100vh;
-      background: rgba(255, 255, 255, 0.96);
-      box-shadow: -2px 0 6px rgba(0, 0, 0, 0.2);
-      padding: 16px;
-      overflow-y: auto;
-    }
-
-    .sidebar h3 {
-      text-align: center;
-      margin-top: 0;
-      color: #2c3e50;
-      border-bottom: 1px solid #ccc;
-      padding-bottom: 8px;
-    }
-
-    fieldset {
-      border: 1px solid #ddd;
-      border-radius: 8px;
-      padding: 10px;
-      margin-top: 14px;
-    }
-
-    legend {
-      font-weight: bold;
-      color: #444;
-      padding: 0 6px;
-    }
-
-    label {
-      display: block;
-      margin-bottom: 5px;
-      font-size: 13px;
-    }
-
-    input[type="radio"] {
-      margin-right: 6px;
-    }
-
-    button {
+    .map {
       width: 100%;
-      margin-top: 16px;
-      padding: 10px;
-      border: none;
-      border-radius: 8px;
-      background-color: #2d9750;
-      color: white;
-      font-weight: bold;
-      cursor: pointer;
+      height: 100%;
+      position: absolute;
+      top: 0;
+      left: 0;
     }
+    #map-compare {
+      z-index: 2;
+      display: none;
+    }
+    
+    #swipe {
+      position: absolute;
+      top: 0;
+      left: 0; /* Positioned at 0, but we use transform/width to handle it? No, standard full width input */
+      width: 100%;
+      height: 100%;
+      margin: 0;
+      z-index: 3;
+      appearance: none;
+      background: transparent;
+      pointer-events: none; /* Pass through clicks */
+      display: none; /* Hidden by default */
+    }
+    
+    #swipe::-webkit-slider-thumb {
+      appearance: none;
+      pointer-events: auto;
+      width: 6px;
+      height: 100vh; /* Full height divider */
+      /*background: #2196F3;*/
+      background: linear-gradient(#2196f3, #1976d2);
+      cursor: col-resize;
+      box-shadow: 0 0 10px rgba(0,0,0,0.5);
+    }
+    #swipe::-moz-range-thumb {
+      pointer-events: auto;
+      width: 4px;
+      height: 100vh;
+      background: #2196F3;
+      cursor: col-resize;
+      box-shadow: 0 0 10px rgba(0,0,0,0.5);
+      border: none;
+    }
+    .sidebar {
+  width: 320px;
+  height: 100vh;
+  background: #ffffff;
+  border-right: 1px solid #ddd;
+  padding: 10px;
+  box-shadow: 2px 0 6px rgba(0,0,0,0.08);
+  overflow-y: auto;
+}
 
+.sidebar-header h2 {
+  font-size: 18px;
+  font-weight: 600;
+}
 
-.region-tabs-top {
-  position: absolute;
-  top: 10px;
-  left: 10px;
-  z-index: 1000;
-  background: rgba(255, 255, 255, 0.9);
-  border-radius: 6px;
-  box-shadow: 0 2px 5px rgba(0,0,0,0.2);
-  display: flex;
+.accordion-item {
+  border: 1px solid #e5e7eb;
+  border-radius: 10px;
+  margin-bottom: 12px;
   overflow: hidden;
 }
-#chart-container {
-  position: relative;
-  flex-shrink: 0;
-  /*width: 25vw;               /* Responsive width — 25% of window */
-  /*height: 100vh;              /* Adjust as needed */
-  height: 90vh;
-  width: 25%;
-  margin: 10px;
-  background: rgba(255, 255, 255, 0.9);
-  border-radius: 10px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.25);
-  z-index: 1000;
-}
-.region-tab-top {
+
+.accordion-header {
+  width: 100%;
+  background: #f6f8fa;
   border: none;
-  padding: 6px 12px;
-  background: transparent;
+  padding: 12px 14px;
+  font-size: 14px;
+  font-weight: 600;
+  text-align: left;
   cursor: pointer;
-  font-weight: bold;
+  display: flex;
+  justify-content: space-between;
+}
+
+.accordion-content {
+  padding: 12px 14px;
+  display: none;
+}
+
+.accordion-item.open .accordion-content {
+  display: block;
+}
+
+.option-group {
+  margin-bottom: 14px;
+}
+
+.option-group h5,
+fieldset legend {
+  font-size: 11px;
+  text-transform: uppercase;
+  color: #6b7280;
+  margin-bottom: 6px;
+}
+
+fieldset {
+  border: none;
+  padding: 0;
+  margin-bottom: 10px;
+}
+
+.radio-vertical label,
+fieldset label {
+  display: block;
   font-size: 13px;
-  color: #333;
-  transition: all 0.2s ease;
+  margin-bottom: 6px;
+  cursor: pointer;
 }
 
-.region-tab-top.active {
-  background: #2d9750;
+.primary-btn {
+  width: 100%;
+  background: #2196f3;
   color: white;
+  border: none;
+  padding: 8px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 13px;
 }
 
-.region-tab-top:hover {
-  background: #43a047;
-  color: white;
+.primary-btn:hover {
+  background: #1976d2;
 }
+    .control-group {
+      margin-bottom: 16px;
+    }
+    .control-group h4 {
+    margin: 0 0 8px 0;
+    font-size: 14px;
+    color: #333;
+  }
 
+  .radio-vertical label {
+    display: block;
+    margin-bottom: 6px;
+    font-size: 13px;
+    cursor: pointer;
+  }
+  
+
+    /* Legend styles */
+    .legend {
+        line-height: 18px;
+        color: #555;
+        background: rgba(255,255,255,0.8);
+        padding: 6px 8px;
+        border-radius: 5px;
+        box-shadow: 0 0 15px rgba(0,0,0,0.2);
+        position: absolute;
+        bottom: 30px;
+        right: 30px;
+        z-index: 1000;
+    }
+    .legend i {
+        width: 18px;
+        height: 18px;
+        float: left;
+        margin-right: 8px;
+        opacity: 0.7;
+    }
+    .switch{
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .switch input {
+      display: none;
+    }
+    .slider {
+      width: 38px;
+      height: 20px;
+      background: #ccc;
+      border-radius: 10px;
+      position: relative;
+      cursor: pointer;
+      }
+
+      .slider::before {
+      content: "";
+      position: absolute;
+      width: 16px;
+      height: 16px;
+      background: white;
+      border-radius: 50%;
+      top: 2px;
+      left: 2px;
+      transition: 0.2s;
+      }
+
+      .switch input:checked + .slider {
+      background: #2196f3;
+      }
+
+      .switch input:checked + .slider::before {
+      transform: translateX(18px);
+      }
+
+      .switch .label {
+      font-size: 13px;
+      }
+
+    /* Tooltip styles */
+    .ol-tooltip {
+      position: absolute;
+      background: rgba(0, 0, 0, 0.8);
+      color: white;
+      padding: 4px 8px;
+      border-radius: 4px;
+      font-size: 12px;
+      pointer-events: none;
+      z-index: 2000;
+      white-space: nowrap;
+      display: none;
+    }
   </style>
+
 </head>
 
-<body>
-  <div class="region-tabs-top">
-    <button class="region-tab-top active" data-region="honduras">Honduras</button>
-  </div>
 
+<body>
   <div style="display:flex; width:100%; height:100vh;">
-  <div id="map" style="flex:1;"></div>
-  <div id="chart-container"></div>
+      <div id="map-wrapper" style="flex:1; position:relative;">
+        <div id="map" class="map"></div>
+        <div id="map-compare" class="map"></div>
+        <input type="range" id="swipe" min="0" max="100" value="50">
+        
+        <div id="legend-container" class="legend" style="display:none;"></div>
+        <div id="tooltip" class="ol-tooltip"></div>
+      </div>
+      
+      <div id="chart-container" style="width:30%; height:100%; background:white;"></div>
   </div>
 
 
   <div class="sidebar">
-    <h3>CropSuite</h3>
 
-    <fieldset id="cropSet">
-      <legend>Crop</legend>
+  <!-- Header -->
+  <div class="sidebar-header">
+    <h2>CropSuite</h2>
+    <label class="switch">
+      <input type="checkbox" id="compareModeToggle">
+      <span class="slider"></span>
+      <span class="label">Compare</span>
+    </label>
+  </div>
+
+  <!-- Crop -->
+  <div class="accordion-item open">
+    <button class="accordion-header">🌱 Crop</button>
+    <div class="accordion-content radio-vertical">
       <label><input type="radio" name="crop" value="banana"> Banana</label>
       <label><input type="radio" name="crop" value="beans" checked> Beans</label>
       <label><input type="radio" name="crop" value="cassava"> Cassava</label>
       <label><input type="radio" name="crop" value="maize"> Maize</label>
-      <label><input type="radio" name="crop" value="coffeearabica"> Coffe Arabica</label>
-    </fieldset>
-
-    <fieldset id="sspSet">
-      <legend>SSP Scenario</legend>
-      <label><input type="radio" name="ssp" value="ssp126" checked> SSP126</label>
-      <label><input type="radio" name="ssp" value="ssp245"> SSP245</label>
-      <label><input type="radio" name="ssp" value="ssp370"> SSP370</label>
-    </fieldset>
-
-    <fieldset id="modelSet">
-      <legend>SSP Scenario</legend>
-      <label><input type="radio" name="model" value="access_esm1_5" checked> access-esm1-5</label>
-      <label><input type="radio" name="model" value="ec_earth3"> ec-earth3</label>
-      <label><input type="radio" name="model" value="inm_cm5_0"> inm-cm5-0</label>
-    </fieldset>
-
-    <fieldset id="periodSet">
-      <legend>Period</legend>
-      <label><input type="radio" name="period" value="2031_2040" checked> 2031–2040</label>
-      <label><input type="radio" name="period" value="2041_2050"> 2041–2050</label>
-      <label><input type="radio" name="period" value="2051_2060"> 2051–2060</label>
-    </fieldset>
-   <button id="toggleDeptBtn" >
-    Show Departments
-  </button>
-    
+      <label><input type="radio" name="crop" value="coffeearabica"> Coffee Arabica</label>
+    </div>
   </div>
 
+  <!-- Scenario A -->
+  <div class="accordion-item open">
+    <button class="accordion-header">🌍 Scenario A</button>
+    <div class="accordion-content">
+
+      <fieldset id="sspSet">
+        <legend>SSP Scenario</legend>
+        <label><input type="radio" name="ssp" value="ssp126" checked> SSP126</label>
+        <label><input type="radio" name="ssp" value="ssp245"> SSP245</label>
+        <label><input type="radio" name="ssp" value="ssp370"> SSP370</label>
+        <label><input type="radio" name="ssp" value="ssp585"> SSP585</label>
+      </fieldset>
+
+      <fieldset id="modelSet">
+        <legend>Model</legend>
+        <label><input type="radio" name="model" value="ensemble" checked> Ensemble</label>
+        <label><input type="radio" name="model" value="access_esm1_5"> access-esm1-5</label>
+        <label><input type="radio" name="model" value="ec_earth3"> ec-earth3</label>
+        <label><input type="radio" name="model" value="inm_cm5_0"> inm-cm5-0</label>
+        <label><input type="radio" name="model" value="mri_esm2_0"> mri-esm2-0</label>
+        <label><input type="radio" name="model" value="mpi_esm1_2_hr"> mpi-esm1-2-hr</label>
+      </fieldset>
+
+      <fieldset id="periodSet">
+        <legend>Period</legend>
+        <label><input type="radio" name="period" value="2031_2040" checked> 2031–2040</label>
+        <label><input type="radio" name="period" value="2041_2050"> 2041–2050</label>
+        <label><input type="radio" name="period" value="2051_2060"> 2051–2060</label>
+      </fieldset>
+
+    </div>
+  </div>
+
+  <!-- Scenario B -->
+  <div class="accordion-item" id="controls-b" style="display:none;">
+    <button class="accordion-header">🌎 Scenario B</button>
+    <div class="accordion-content">
+
+      <fieldset id="sspSet_b">
+        <legend>SSP Scenario</legend>
+        <label><input type="radio" name="ssp_b" value="ssp126" checked> SSP126</label>
+        <label><input type="radio" name="ssp_b" value="ssp245"> SSP245</label>
+        <label><input type="radio" name="ssp_b" value="ssp370"> SSP370</label>
+        <label><input type="radio" name="ssp_b" value="ssp585"> SSP585</label>
+      </fieldset>
+
+      <fieldset id="modelSet_b">
+        <legend>Model</legend>
+        <label><input type="radio" name="model_b" value="ensemble" checked> Ensemble</label>
+        <label><input type="radio" name="model_b" value="access_esm1_5"> access-esm1-5</label>
+        <label><input type="radio" name="model_b" value="ec_earth3"> ec-earth3</label>
+        <label><input type="radio" name="model_b" value="inm_cm5_0"> inm-cm5-0</label>
+        <label><input type="radio" name="model_b" value="mri_esm2_0"> mri-esm2-0</label>
+        <label><input type="radio" name="model_b" value="mpi_esm1_2_hr"> mpi-esm1-2-hr</label>
+      </fieldset>
+
+      <fieldset id="periodSet_b">
+        <legend>Period</legend>
+        <label><input type="radio" name="period_b" value="2031_2040" checked> 2031–2040</label>
+        <label><input type="radio" name="period_b" value="2041_2050"> 2041–2050</label>
+        <label><input type="radio" name="period_b" value="2051_2060"> 2051–2060</label>
+      </fieldset>
+
+    </div>
+  </div>
+
+  <!-- Departments -->
+  <div class="accordion-item">
+    <button class="accordion-header">🗺 Departments</button>
+    <div class="accordion-content">
+      <button id="toggleDeptBtn" class="primary-btn">
+        Show Departments
+      </button>
+    </div>
+  </div>
+
+</div>
+
   
-
   <!-- Dependencies -->
-  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-  <script src="https://unpkg.com/georaster/dist/georaster.browser.min.js"></script>
-  <script src="https://unpkg.com/georaster-layer-for-leaflet/dist/georaster-layer-for-leaflet.min.js"></script>
-
+  <!-- GeoTIFF library (dependency for ol.source.GeoTIFF in full build) -->
+  <script src="https://cdn.jsdelivr.net/npm/geotiff"></script>
+  <!-- OpenLayers JS -->
+  <script src="https://cdn.jsdelivr.net/npm/ol@v8.2.0/dist/ol.js"></script>
+  
   <script src="https://cdn.jsdelivr.net/npm/echarts@5/dist/echarts.min.js"></script>
   <script src="src/js/geotiff_vis.js"></script>
   <script src="src/js/suitability_chart.js"></script> 
   <!-- Dependencies -->
-   
-
+   <script>
+document.querySelectorAll(".accordion-header").forEach(btn => {
+  btn.addEventListener("click", () => {
+    btn.parentElement.classList.toggle("open");
+  });
+});
+</script>
 </body>
 </html>

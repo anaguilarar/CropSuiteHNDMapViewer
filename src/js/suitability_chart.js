@@ -32,8 +32,10 @@ function updateSuitabilityChart() {
   const crop = document.querySelector('input[name="crop"]:checked')?.value;
   const ssp = document.querySelector('input[name="ssp"]:checked')?.value;
   const model = document.querySelector('input[name="model"]:checked')?.value;
-  const currentPeriod = document.querySelector('input[name="period"]:checked')?.value;
-
+  let currentPeriod = document.querySelector('input[name="period"]:checked')?.value;
+  if(ssp === "historical"){
+   currentPeriod = "2005_2014"; 
+  }
   // Filter only the selected crop + SSP
   const filtered = suitabilityData.filter(
     d => d.crop === crop && d.ssp === ssp && d.model === model
@@ -130,11 +132,50 @@ function updateSuitabilityChart() {
   suitabilityChart.setOption(option, true);
 }
 
+// --- Sync Logic: Highlight department in chart from map hover ---
+function highlightDepartmentInChart(deptName) {
+  if (!suitabilityChart) return;
+
+  // Find the index of the department in the chart's Y-axis data
+  const option = suitabilityChart.getOption();
+  if (!option || !option.yAxis || !option.yAxis[0].data) return;
+
+  const yAxisData = option.yAxis[0].data;
+  const index = yAxisData.indexOf(deptName);
+
+  if (index !== -1) {
+    // Highlight the department and show tooltip
+    suitabilityChart.dispatchAction({
+      type: "highlight",
+      seriesIndex: 0,
+      dataIndex: index
+    });
+    suitabilityChart.dispatchAction({
+      type: "showTip",
+      seriesIndex: 0,
+      dataIndex: index
+    });
+  } else {
+    // Clear highlights if not found
+    suitabilityChart.dispatchAction({
+      type: "downplay"
+    });
+    suitabilityChart.dispatchAction({
+      type: "hideTip"
+    });
+  }
+}
+
 // --- Listen to sidebar radio buttons for live updates ---
-["crop", "ssp",  "model"].forEach(name => {
+["crop", "ssp", "period", "model"].forEach(name => {
   document.querySelectorAll(`input[name="${name}"]`).forEach(el => {
     el.addEventListener("change", updateSuitabilityChart);
   });
+});
+
+// Resize chart on window resize
+window.addEventListener("resize", () => {
+    if (suitabilityChart) suitabilityChart.resize();
 });
 
 // Initialize once everything is loaded
