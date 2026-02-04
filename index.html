@@ -159,7 +159,29 @@ fieldset label {
     font-size: 13px;
     cursor: pointer;
   }
-  
+
+  .pick-active {
+    background: #4caf50 !important;
+    box-shadow: 0 0 8px rgba(76, 175, 80, 0.5);
+  }
+
+  .analysis-results {
+    margin-top: 10px;
+    font-size: 13px;
+    border-top: 1px solid #eee;
+    padding-top: 10px;
+  }
+  .analysis-row {
+    display: flex;
+    justify-content: space-between;
+    padding: 4px 0;
+    border-bottom: 1px solid #f9f9f9;
+  }
+  .analysis-row span:last-child {
+    font-weight: 600;
+    color: #2196F3;
+  }
+
 
     /* Legend styles */
     .legend {
@@ -235,36 +257,29 @@ fieldset label {
       white-space: nowrap;
       display: none;
     }
+
   </style>
 
 </head>
 
 
 <body>
-  <div style="display:flex; width:100%; height:100vh;">
-      <div id="map-wrapper" style="flex:1; position:relative;">
-        <div id="map" class="map"></div>
-        <div id="map-compare" class="map"></div>
-        <input type="range" id="swipe" min="0" max="100" value="50">
-        
-        <div id="legend-container" class="legend" style="display:none;"></div>
-        <div id="tooltip" class="ol-tooltip"></div>
-      </div>
-      
-      <div id="chart-container" style="width:30%; height:100%; background:white;"></div>
-  </div>
-
-
   <div class="sidebar">
 
   <!-- Header -->
-  <div class="sidebar-header">
-    <h2>CropSuite</h2>
+  <div class="sidebar-header" style="margin-bottom: 20px; display: flex; justify-content: space-between; align-items: center;">
+    <h2 style="margin: 0;">CropSuite</h2>
     <label class="switch">
       <input type="checkbox" id="compareModeToggle">
       <span class="slider"></span>
       <span class="label">Compare</span>
     </label>
+  </div>
+
+  <div style="margin-bottom: 15px;">
+    <button id="toggleDeptBtn" class="primary-btn" style="background: #37474f;">
+      🗺️ Show Departments
+    </button>
   </div>
 
   <!-- Crop -->
@@ -335,18 +350,40 @@ fieldset label {
     </div>
   </div>
 
-  <!-- Departments -->
+  <!-- Location Analysis -->
   <div class="accordion-item">
-    <button class="accordion-header">Departments</button>
+    <button class="accordion-header">📍 Location Analysis</button>
     <div class="accordion-content">
-      <button id="toggleDeptBtn" class="primary-btn">
-        Show Departments
-      </button>
+      <div style="display: grid; gap: 8px; margin-bottom: 10px;">
+        <div style="display: flex; gap: 5px;">
+          <input type="number" id="input-lat" placeholder="Latitude" step="0.0001" style="width: 50%; padding: 5px; border: 1px solid #ddd; border-radius: 4px;">
+          <input type="number" id="input-lon" placeholder="Longitude" step="0.0001" style="width: 50%; padding: 5px; border: 1px solid #ddd; border-radius: 4px;">
+        </div>
+        <div style="display: flex; gap: 5px;">
+           <button id="pickLocationBtn" class="primary-btn" style="background: #607d8b;">🎯 Pick on Map</button>
+           <button id="runAnalysisBtn" class="primary-btn">Compute</button>
+        </div>
+      </div>
+      <div id="location-analysis-results" class="analysis-results" style="display:none;">
+        <!-- Results will be injected here -->
+      </div>
     </div>
   </div>
 
-</div>
+  </div>
 
+  <div style="display:flex; flex:1; height:100vh;">
+      <div id="map-wrapper" style="flex:1; position:relative;">
+        <div id="map" class="map"></div>
+        <div id="map-compare" class="map"></div>
+        <input type="range" id="swipe" min="0" max="100" value="50">
+        
+        <div id="legend-container" class="legend" style="display:none;"></div>
+        <div id="tooltip" class="ol-tooltip"></div>
+      </div>
+      
+      <div id="chart-container" style="width:30%; height:100%; background:white;"></div>
+  </div>
   
   <!-- Dependencies -->
   <!-- GeoTIFF library (dependency for ol.source.GeoTIFF in full build) -->
@@ -357,13 +394,15 @@ fieldset label {
   <script src="https://cdn.jsdelivr.net/npm/echarts@5/dist/echarts.min.js"></script>
   <script src="src/js/geotiff_vis.js"></script>
   <script src="src/js/suitability_chart.js"></script> 
+  <script src="src/js/ai_assistant.js"></script> 
   <!-- Dependencies -->
-   <script>
+      <script>
 document.querySelectorAll(".accordion-header").forEach(btn => {
   btn.addEventListener("click", () => {
     btn.parentElement.classList.toggle("open");
   });
 });
-</script>
+</script> 
+
 </body>
 </html>

@@ -257,6 +257,124 @@ document.getElementById('swipe').addEventListener('input', updateClip);
 let deptLayerA = null;
 let deptLayerB = null;
 let deptVisible = false;
+let pickMode = false;
+
+document.getElementById("pickLocationBtn").addEventListener("click", () => {
+    pickMode = !pickMode;
+    const btn = document.getElementById("pickLocationBtn");
+    if (pickMode) {
+        btn.classList.add("pick-active");
+        btn.innerText = "🛑 Stop Picking";
+        document.getElementById('map-wrapper').style.cursor = 'crosshair';
+    } else {
+        btn.classList.remove("pick-active");
+        btn.innerText = "🎯 Pick on Map";
+        document.getElementById('map-wrapper').style.cursor = 'default';
+    }
+});
+
+async function runLocationAnalysis() {
+    const lat = parseFloat(document.getElementById("input-lat").value);
+    const lon = parseFloat(document.getElementById("input-lon").value);
+    const resultsDiv = document.getElementById("location-analysis-results");
+    const isCompare = document.getElementById('compareModeToggle').checked;
+
+    if (isNaN(lat) || isNaN(lon)) {
+        alert("Please enter valid coordinates or pick a location on the map.");
+        return;
+    }
+
+    resultsDiv.style.display = 'block';
+    resultsDiv.innerHTML = 'Analyzing... <span class="loader"></span>';
+
+    const crops = [
+        { id: "banana", name: "Banana" },
+        { id: "beans", name: "Beans" },
+        { id: "cassava", name: "Cassava" },
+        { id: "maize", name: "Maize" },
+        { id: "coffeearabica", name: "Coffee Arabica" }
+    ];
+
+    const getParams = (suffix = '') => {
+        const ssp = document.querySelector(`input[name="ssp${suffix}"]:checked`).value;
+        const model = document.querySelector(`input[name="model${suffix}"]:checked`).value;
+        let period = document.querySelector(`input[name="period${suffix}"]:checked`).value;
+        if(ssp === "historical") period = "2005_2014";
+        return { ssp, model, period };
+    };
+
+    const paramsA = getParams('');
+    const paramsB = isCompare ? getParams('_b') : null;
+
+    let html = isCompare 
+        ? `<div style="display:flex; justify-content:space-between; font-size:11px; color:#666; margin-bottom:5px; border-bottom:1px solid #eee; padding-bottom:4px;">
+             <span>A: ${paramsA.ssp} (${paramsA.period})</span>
+             <span>B: ${paramsB.ssp} (${paramsB.period})</span>
+           </div>`
+        : `<strong>Results for ${paramsA.ssp} (${paramsA.period})</strong>`;
+    
+    html += `<div style="margin-top:5px;">`;
+
+    for (const crop of crops) {
+        const urlA = `src/tif/ST0_${paramsA.model}_${paramsA.ssp}_${paramsA.period}_${crop.id}_bl_suit.tif`;
+        try {
+            const valA = await sampleGeoTIFFValue(urlA, lon, lat);
+            const displayValA = (valA !== null && valA >= 0) ? `${valA.toFixed(1)}%` : "N/A";
+            
+            let displayVal = displayValA;
+            if (isCompare) {
+                const urlB = `src/tif/ST0_${paramsB.model}_${paramsB.ssp}_${paramsB.period}_${crop.id}_bl_suit.tif`;
+                const valB = await sampleGeoTIFFValue(urlB, lon, lat);
+                const displayValB = (valB !== null && valB >= 0) ? `${valB.toFixed(1)}%` : "N/A";
+                displayVal = `<span style="color:#2196F3">${displayValA}</span> / <span style="color:#E91E63">${displayValB}</span>`;
+            }
+
+            html += `<div class="analysis-row"><span>${crop.name}</span><span>${displayVal}</span></div>`;
+        } catch (err) {
+            html += `<div class="analysis-row"><span>${crop.name}</span><span>Error</span></div>`;
+        }
+    }
+    html += "</div>";
+    resultsDiv.innerHTML = html;
+}
+
+async function sampleGeoTIFFValue(url, lon, lat) {
+    try {
+        const tiff = await GeoTIFF.fromUrl(url);
+        const image = await tiff.getImage();
+        const bbox = image.getBoundingBox(); // [minX, minY, maxX, maxY]
+        const width = image.getWidth();
+        const height = image.getHeight();
+
+        if (lon < bbox[0] || lon > bbox[2] || lat < bbox[1] || lat > bbox[3]) {
+            return null; // Outside bounds
+        }
+
+        const resX = (bbox[2] - bbox[0]) / width;
+        const resY = (bbox[3] - bbox[1]) / height;
+
+        const px = Math.floor((lon - bbox[0]) / resX);
+        const py = Math.floor((bbox[3] - lat) / resY);
+
+        const data = await image.readRasters({ window: [px, py, px + 1, py + 1] });
+        return data[0][0];
+    } catch (err) {
+        console.error("Sampling error:", err);
+        return null;
+    }
+}
+
+document.getElementById("runAnalysisBtn").addEventListener("click", runLocationAnalysis);
+
+function handleMapClick(evt) {
+    if (pickMode) {
+        const coords = ol.proj.toLonLat(evt.coordinate);
+        document.getElementById("input-lat").value = coords[1].toFixed(5);
+        document.getElementById("input-lon").value = coords[0].toFixed(5);
+        runLocationAnalysis();
+        return;
+    }
+}
 
 document.getElementById("toggleDeptBtn").addEventListener("click", () => {
   if (!mapA) return;
@@ -307,8 +425,8 @@ function handlePointerMove(evt) {
     if (deptoName) {
       tooltip.innerText = deptoName;
       tooltip.style.display = 'block';
-      tooltip.style.left = (evt.originalEvent.pageX + 10) + 'px';
-      tooltip.style.top = (evt.originalEvent.pageY + 10) + 'px';
+      tooltip.style.left = (pixel[0] + 15) + 'px';
+      tooltip.style.top = (pixel[1] + 15) + 'px';
       
       // SYNC: Highlight in chart
       if (typeof highlightDepartmentInChart === 'function') highlightDepartmentInChart(deptoName);
@@ -325,6 +443,12 @@ window.addEventListener('load', () => {
     updateLayer('A');
 
     // Attach hover listeners
-    if (mapA) mapA.on('pointermove', handlePointerMove);
-    if (mapB) mapB.on('pointermove', handlePointerMove);
+    if (mapA) {
+        mapA.on('pointermove', handlePointerMove);
+        mapA.on('click', handleMapClick);
+    }
+    if (mapB) {
+        mapB.on('pointermove', handlePointerMove);
+        mapB.on('click', handleMapClick);
+    }
 });
