@@ -385,7 +385,7 @@ document.getElementById("toggleDeptBtn").addEventListener("click", () => {
       fill: new ol.style.Fill({ color: 'rgba(0, 0, 0, 0)' }) // Transparent fill for hit detection
     });
     const source = new ol.source.Vector({
-      url: 'src/data/country.geojson',
+      url: 'src/data/hnd_dpts.geojson',
       format: new ol.format.GeoJSON()
     });
 
