@@ -91,7 +91,7 @@ async function updateLayer(mapTarget) {
   const model = document.querySelector(`input[name="model${suffix}"]:checked`).value;
   let period = document.querySelector(`input[name="period${suffix}"]:checked`).value;
   if(ssp === "historical"){
-   period = "2005_2014"; 
+   period = "1981_2010"; 
   }
   const url = `src/tif/ST0_${model}_${ssp}_${period}_${crop}_bl_suit.tif`;
   const is_suit = true;
